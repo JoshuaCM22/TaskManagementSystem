@@ -70,5 +70,5 @@
     <ul><li>Summarize the key points of the document.</li></ul>
   </li>
 </ol>
-<p>Remember that this is just a basic outline, and you can analyze and add more details based on the complexity and requirements of your mini-project. Good luck with your ASP.NET MVC mini-project!</p>
+<p>Remember that this is just a basic outline, and you can analyze and add more details based on the complexity and requirements of your mini-project.
 
