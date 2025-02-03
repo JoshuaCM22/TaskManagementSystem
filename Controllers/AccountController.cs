@@ -17,7 +17,11 @@ namespace TaskManagementSystem.Controllers
         [HttpGet]
         public ActionResult Register()
         {
-            if (!User.Identity.IsAuthenticated) return View();
+            if (!User.Identity.IsAuthenticated)
+            {
+                var viewModels = new RegisterViewModel();
+                return View(viewModels);
+            }
             return RedirectToAction("TaskList", "Task");
         }
 
@@ -38,7 +42,11 @@ namespace TaskManagementSystem.Controllers
         [HttpGet]
         public ActionResult Login()
         {
-            if (!User.Identity.IsAuthenticated) return View();
+            if (!User.Identity.IsAuthenticated)
+            {
+                var viewModels = new LoginViewModel();
+                return View(viewModels);
+            }
             return RedirectToAction("TaskList", "Task");
         }
 
@@ -67,6 +75,7 @@ namespace TaskManagementSystem.Controllers
         public ActionResult Logout()
         {
             FormsAuthentication.SignOut();
+            Session.Abandon();
             return RedirectToAction("Login");
         }
     }
