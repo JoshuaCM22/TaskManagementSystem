@@ -179,6 +179,7 @@ namespace TaskManagementSystem.Controllers
 
             ViewBag.PriorityList = _taskService.GetAllTaskPriorities();
             ViewBag.StatusList = _taskService.GetAllTaskStatuses();
+            ViewBag.UserList = _taskService.GetAllUsersExceptSelf();
 
             return View(task);
 
