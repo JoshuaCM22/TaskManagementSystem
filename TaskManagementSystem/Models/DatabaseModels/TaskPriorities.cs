@@ -1,0 +1,18 @@
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace TaskManagementSystem.Models.DatabaseModels
+{
+    [Table("TaskPriorities")]
+    public class TaskPriorities
+    {
+        [Key]
+        [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
+        public byte ID { get; set; }
+
+        [Required] // Ensures PriorityName is not null
+        [Index(IsUnique = true)] // Adds a unique constraint
+        [StringLength(50)] // Optional
+        public string PriorityName { get; set; }
+    }
+}
