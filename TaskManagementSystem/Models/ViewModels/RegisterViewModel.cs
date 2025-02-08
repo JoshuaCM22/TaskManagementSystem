@@ -17,8 +17,5 @@ namespace TaskManagementSystem.Models.ViewModels
         [Required(ErrorMessage ="Please Enter Confirm Password")]
         [Compare("Password", ErrorMessage ="Password Mismatch")]
         public string ConfirmPassword { get; set; }
-
-
-        public byte RoleId { get; set; }
     }
 }

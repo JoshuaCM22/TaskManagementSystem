@@ -37,7 +37,6 @@ namespace TaskManagementSystem.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    viewModel.RoleId = 1; // 1 = Admin
                     _accountService.Register(viewModel);
                     TempData["successMessage"] = "Successfully Created";
                     return RedirectToAction("login", "account");

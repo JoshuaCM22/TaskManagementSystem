@@ -15,8 +15,8 @@ namespace TaskManagementSystem.Models.BusinessLogicLayer
 
         public void Register(RegisterViewModel viewModel)
         {
-            Users user = new Users() { Username = viewModel.Username, Password = viewModel.Password, RoleID = viewModel.RoleId };
-             _accountRepository.CreateAccount(user);
+            Users user = new Users() { Username = viewModel.Username, Password = viewModel.Password, RoleID = 2 }; // 2 = Regular User
+            _accountRepository.CreateAccount(user);
         }
 
 
