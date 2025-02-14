@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using TaskManagementSystem.Models.DatabaseModels;
 using TaskManagementSystem.Models.Interfaces;
@@ -17,83 +18,87 @@ namespace TaskManagementSystem.Models.BusinessLogicLayer
             _taskRepository = taskRepository;
         }
 
-        public List<TaskViewModel> GetAllTasks()
+        public async Task<List<TaskViewModel>> GetAllTasks()
         {
-            return _taskRepository.GetAllTasks().Select(tasks => new TaskViewModel()
+            var tasks = await _taskRepository.GetAllTasks();
+
+
+            return tasks.Select(task => new TaskViewModel()
             {
-                TaskId = tasks.ID,
-                Title = tasks.Title,
-                Description = tasks.Description,
-                DueDate = tasks.DueDate,
-                TaskPriorityID = tasks.TaskPriorityID,
-                TaskPriorityName = tasks.TaskPriority?.PriorityName,
-                TaskStatusID = tasks.TaskStatusID,
-                TaskStatusName = tasks.TaskStatus?.StatusName,
-                UserID = tasks.UserID,
-                UserName = tasks.User.Username
+                TaskId = task.ID,
+                Title = task.Title,
+                Description = task.Description,
+                DueDate = task.DueDate,
+                TaskPriorityID = task.TaskPriorityID,
+                TaskPriorityName = task.TaskPriority?.PriorityName,
+                TaskStatusID = task.TaskStatusID,
+                TaskStatusName = task.TaskStatus?.StatusName,
+                UserID = task.UserID,
+                UserName = task.User.Username
             }).ToList();
         }
 
 
-        public IEnumerable<SelectListItem> GetAllTaskPriorities()
+        public async Task<IEnumerable<SelectListItem>> GetAllTaskPriorities()
         {
-            var prioritySelectList = _taskRepository.GetAllTaskPriorities().Select(x => new SelectListItem
+            var priorities = await _taskRepository.GetAllTaskPriorities();
+
+            return priorities.Select(x => new SelectListItem
             {
                 Value = x.ID.ToString(),
                 Text = x.PriorityName
             });
-
-            return prioritySelectList;
         }
 
 
-
-        public IEnumerable<SelectListItem> GetAllTaskStatuses()
+        public async Task<IEnumerable<SelectListItem>> GetAllTaskStatuses()
         {
-            var statusSelectList = _taskRepository.GetAllTaskStatuses().Select(x => new SelectListItem
+            var status = await _taskRepository.GetAllTaskStatuses();
+
+            return status.Select(x => new SelectListItem
             {
                 Value = x.ID.ToString(),
                 Text = x.StatusName
             });
-
-            return statusSelectList;
         }
 
-        public IEnumerable<SelectListItem> GetAllUsersExceptSelf()
+
+
+        public async Task<IEnumerable<SelectListItem>> GetAllUsersExceptSelf()
         {
-            var statusSelectList = _taskRepository.GetAllUsersExceptSelf().Select(x => new SelectListItem
+            var users = await _taskRepository.GetAllUsersExceptSelf();
+
+            return users.Select(x => new SelectListItem
             {
                 Value = x.ID.ToString(),
                 Text = x.Username
             });
+        }
 
-            return statusSelectList;
+
+        public async Task<List<TaskViewModel>> GetAllTasksByUsername(string username)
+        {
+            var tasks = await _taskRepository.GetAllTasks(username);
+
+            return tasks.Select(x => new TaskViewModel()
+            {
+                TaskId = x.ID,
+                Title = x.Title,
+                Description = x.Description,
+                DueDate = x.DueDate,
+                TaskPriorityID = x.TaskPriorityID,
+                TaskPriorityName = x.TaskPriority?.PriorityName,
+                TaskStatusID = x.TaskStatusID,
+                TaskStatusName = x.TaskStatus?.StatusName,
+                UserID = x.UserID
+            }).ToList();
         }
 
 
 
-        public List<TaskViewModel> GetAllTasksByUsername(string username)
+        public async Task<TaskViewModel> GetTaskById(int taskId)
         {
-            return _taskRepository.GetAllTasks(username)
-                                  .Select(x => new TaskViewModel()
-                                  {
-                                      TaskId = x.ID,
-                                      Title = x.Title,
-                                      Description = x.Description,
-                                      DueDate = x.DueDate,
-                                      TaskPriorityID = x.TaskPriorityID,
-                                      TaskPriorityName = x.TaskPriority?.PriorityName,
-                                      TaskStatusID = x.TaskStatusID,
-                                      TaskStatusName = x.TaskStatus?.StatusName,
-                                      UserID = x.UserID
-                                  }).ToList();
-        }
-
-
-
-        public TaskViewModel GetTaskById(int taskId)
-        {
-            Tasks _task = _taskRepository.GetTask(taskId);
+            Tasks _task = await _taskRepository.GetTask(taskId);
             if (_task != null)
             {
                 TaskViewModel _taskViewModel = new TaskViewModel()
@@ -115,9 +120,9 @@ namespace TaskManagementSystem.Models.BusinessLogicLayer
         }
 
 
-        public void CreateTask(TaskViewModel taskViewModel)
+        public async Task CreateTask(TaskViewModel taskViewModel)
         {
-            if (taskViewModel.UserName != null && taskViewModel.UserID == 0) taskViewModel.UserID = _taskRepository.GetUserID(taskViewModel.UserName);
+            if (taskViewModel.UserName != null && taskViewModel.UserID == 0) taskViewModel.UserID = await _taskRepository.GetUserID(taskViewModel.UserName);
 
             Tasks task = new Tasks()
             {
@@ -128,11 +133,12 @@ namespace TaskManagementSystem.Models.BusinessLogicLayer
                 TaskStatusID = taskViewModel.TaskStatusID,
                 UserID = taskViewModel.UserID,
             };
-            _taskRepository.CreateTask(task);
+
+            await _taskRepository.CreateTask(task);
         }
 
 
-        public void UpdateTask(TaskViewModel taskViewModel)
+        public async Task UpdateTask(TaskViewModel taskViewModel)
         {
             Tasks _task = new Tasks()
             {
@@ -144,13 +150,23 @@ namespace TaskManagementSystem.Models.BusinessLogicLayer
                 TaskStatusID = taskViewModel.TaskStatusID,
                 UserID = taskViewModel.UserID
             };
-            _taskRepository.UpdateTask(_task);
+            await _taskRepository.UpdateTask(_task);
         }
 
 
-        public void DeleteTask(int taskId)
+        public async Task DeleteTask(TaskViewModel taskViewModel)
         {
-            _taskRepository.DeleteTask(taskId);
+            Tasks _task = new Tasks()
+            {
+                ID = taskViewModel.TaskId,
+                Title = taskViewModel.Title,
+                Description = taskViewModel.Description,
+                DueDate = taskViewModel.DueDate,
+                TaskPriorityID = taskViewModel.TaskPriorityID,
+                TaskStatusID = taskViewModel.TaskStatusID,
+                UserID = taskViewModel.UserID
+            };
+            await _taskRepository.DeleteTask(_task);
         }
 
     }

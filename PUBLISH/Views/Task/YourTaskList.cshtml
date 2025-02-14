@@ -1,16 +1,19 @@
 ﻿@model IEnumerable<TaskManagementSystem.Models.ViewModels.TaskViewModel>
 @{
-    ViewBag.Title = "Admin Dashboard - All Tasks";
+    ViewBag.Title = "Your Task List";
 }
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center">
-        <h2 class="fw-bold">Admin Dashboard - All Tasks</h2>
-        @Html.ActionLink("Your Task List", "TaskList", "Task", null, new { @class = "btn btn-dark btn-md" })
+        <h2 class="fw-bold">Your Task List</h2>
+        @if (User.IsInRole("Admin"))
+        {
+            @Html.ActionLink("All Task List", "AllTaskList", "Admin", null, new { @class = "btn btn-dark btn-md" })
+        }
     </div>
-    <hr>
+    <br>
 
-    @Html.ActionLink("Create New Task To Other", "CreateTask", null, new { @class = "btn btn-primary btn-md mb-3" })
+    @Html.ActionLink("Create New Task", "CreateNew", null, new { @class = "btn btn-primary btn-md mb-3" })
 
     <div class="table-responsive">
         <table class="table table-hover table-bordered text-center align-middle">
@@ -22,7 +25,6 @@
                     <th>Due Date</th>
                     <th>Priority</th>
                     <th>Status</th>
-                    <th>Username</th>
                     <th style="width: 15%;">Action</th>
                 </tr>
             </thead>
@@ -75,21 +77,26 @@
                             {
                                 <td>@task.TaskStatusName</td>
                             }
-                            <td>@task.UserName</td>
                             <td>
-                                <a href="@Url.Action("Edit", "Admin", new { taskId = task.TaskId })" class="btn btn-primary btn-md me-2">Edit</a>
-                                <a href="@Url.Action("Delete", "Admin", new { taskId = task.TaskId })" class="btn btn-danger btn-md">Delete</a>
+                                <a href="@Url.Action("edit", "task", new { taskId = task.TaskId })" class="btn btn-primary btn-md me-2">Edit</a>
+
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a href="@Url.Action("Delete", "Task", new { taskId = task.TaskId })" class="btn btn-danger btn-md">Delete</a>
+                                }
                             </td>
                         </tr>
+
                     }
                 }
                 else
                 {
                     <tr>
-                        <td colspan="8" class="text-center fw-bold text-muted">No Records Found</td>
+                        <td colspan="7" class="text-center fw-bold text-muted">No Records Found</td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
+<br>

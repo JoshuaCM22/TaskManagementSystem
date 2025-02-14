@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using TaskManagementSystem.Models.Interfaces;
 using TaskManagementSystem.Models.ViewModels;
@@ -16,9 +17,9 @@ namespace TaskManagementSystem.Controllers
             _taskService = taskService;
         }
 
-        [Route("task-list")]
+        [Route("all-task-list")]
         [HttpGet]
-        public ActionResult TaskList()
+        public async Task<ActionResult> AllTaskList()
         {
             if (!User.Identity.IsAuthenticated) return RedirectToAction("login", "account");
 
@@ -26,46 +27,46 @@ namespace TaskManagementSystem.Controllers
 
             try
             {
-                taskList = _taskService.GetAllTasks();
+                taskList = await _taskService.GetAllTasks();
             }
             catch (Exception ex)
             {
-                TempData["errorMessage"] = "An error has occured in TaskList(). Error Message: " + ex.Message;
+                TempData["errorMessage"] = "An error has occured in AllTaskList(). Error Message: " + ex.Message;
             }
 
             return View(taskList);
         }
 
-        [Route("create-task")]
+        [Route("create-new")]
         [HttpGet]
-        public ActionResult CreateTask()
+        public async Task<ActionResult> CreateNew()
         {
             if (!User.Identity.IsAuthenticated) return RedirectToAction("login", "account");
 
             var viewModel = new TaskViewModel();
             viewModel.TaskPriorityID = 1;
-            ViewBag.PriorityList = _taskService.GetAllTaskPriorities();
-            ViewBag.UserList = _taskService.GetAllUsersExceptSelf();
+            ViewBag.PriorityList = await _taskService.GetAllTaskPriorities();
+            ViewBag.UserList = await _taskService.GetAllUsersExceptSelf();
             return View(viewModel);
         }
 
-        [Route("create-task")]
+        [Route("create-new")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult CreateTask(TaskViewModel task)
+        public async Task<ActionResult> CreateNew(TaskViewModel task)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
                     task.TaskStatusID = 1;
-                    _taskService.CreateTask(task);
+                    await _taskService.CreateTask(task);
                     TempData["successMessage"] = "Successfully Created";
-                    return RedirectToAction("task-list");
+                    return RedirectToAction("all-task-list", "admin");
                 }
 
-                ViewBag.PriorityList = _taskService.GetAllTaskPriorities();
-                ViewBag.UserList = _taskService.GetAllUsersExceptSelf();
+                ViewBag.PriorityList = await _taskService.GetAllTaskPriorities();
+                ViewBag.UserList = await _taskService.GetAllUsersExceptSelf();
             }
             catch (Exception ex)
             {
@@ -77,19 +78,19 @@ namespace TaskManagementSystem.Controllers
 
 
 
-        [Route("delete/{taskId?}")]  // Use a more specific route
+        [Route("delete/{taskId}")]
         [HttpGet]
-        public ActionResult Delete(int? taskId)
+        public async Task<ActionResult> Delete(int taskId)
         {
             if (!User.Identity.IsAuthenticated) return RedirectToAction("login", "account");
 
-            if (taskId != 0 && taskId != null)
+            if (taskId != 0)
             {
                 TaskViewModel viewModel = null;
                 try
                 {
-                    viewModel = _taskService.GetTaskById(int.Parse(taskId.ToString()));
-                    ViewBag.StatusList = _taskService.GetAllTaskStatuses();
+                    viewModel = await _taskService.GetTaskById(int.Parse(taskId.ToString()));
+                    ViewBag.StatusList = await _taskService.GetAllTaskStatuses();
                 }
                 catch (Exception ex)
                 {
@@ -99,52 +100,43 @@ namespace TaskManagementSystem.Controllers
             }
 
 
-            return RedirectToAction("task-list", "admin");
+            return RedirectToAction("all-task-list", "admin");
         }
 
-        [Route("delete")]
+        [Route("delete/{taskId}")]
         [HttpPost]
-        [ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(TaskViewModel task)
+        public async Task<ActionResult> Delete(TaskViewModel taskViewModel)
         {
-
-            if (task.TaskId != 0)
+            try
             {
-                try
-                {
-                    _taskService.DeleteTask(task.TaskId);
-                    TempData["successMessage"] = "Successfully Deleted";
-                    return RedirectToAction("task-list", "admin");
-                }
-                catch (Exception ex)
-                {
-                    TempData["errorMessage"] = "An error has occured in Delete(). Error Message: " + ex.Message;
-                }
-
-                return View(task);
+                await _taskService.DeleteTask(taskViewModel);
+                TempData["successMessage"] = "Successfully Deleted";
+                return RedirectToAction("all-task-list", "admin");
+            }
+            catch (Exception ex)
+            {
+                TempData["errorMessage"] = "An error has occured in Delete(). Error Message: " + ex.Message;
             }
 
-
-            return View(task);
-
+            return View();
         }
 
 
-        [Route("edit/{taskId?}")] 
+        [Route("edit/{taskId?}")]
         [HttpGet]
-        public ActionResult Edit(int? taskId)
+        public async Task<ActionResult> Edit(int taskId)
         {
             if (!User.Identity.IsAuthenticated) return RedirectToAction("login", "account");
 
-            if (taskId != 0 && taskId != null)
+            if (taskId != 0)
             {
                 try
                 {
-                    TaskViewModel _task = _taskService.GetTaskById(int.Parse(taskId.ToString()));
-                    ViewBag.PriorityList = _taskService.GetAllTaskPriorities();
-                    ViewBag.StatusList = _taskService.GetAllTaskStatuses();
-                    ViewBag.UserList = _taskService.GetAllUsersExceptSelf();
+                    TaskViewModel _task = await _taskService.GetTaskById(int.Parse(taskId.ToString()));
+                    ViewBag.PriorityList = await _taskService.GetAllTaskPriorities();
+                    ViewBag.StatusList = await _taskService.GetAllTaskStatuses();
+                    ViewBag.UserList = await _taskService.GetAllUsersExceptSelf();
                     return View(_task);
                 }
                 catch (Exception ex)
@@ -153,21 +145,21 @@ namespace TaskManagementSystem.Controllers
                 }
             }
 
-            return RedirectToAction("task-list");
+            return RedirectToAction("all-task-list", "admin");
         }
 
-        [Route("edit/{taskId?}")] 
+        [Route("edit")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(TaskViewModel task)
+        public async Task<ActionResult> Edit(TaskViewModel task)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _taskService.UpdateTask(task);
+                    await _taskService.UpdateTask(task);
                     TempData["successMessage"] = "Successfully Saved";
-                    return RedirectToAction("task-list", "admin");
+                    return RedirectToAction("all-task-list", "admin");
                 }
                 catch (Exception ex)
                 {
@@ -177,9 +169,9 @@ namespace TaskManagementSystem.Controllers
                 return View(task);
             }
 
-            ViewBag.PriorityList = _taskService.GetAllTaskPriorities();
-            ViewBag.StatusList = _taskService.GetAllTaskStatuses();
-            ViewBag.UserList = _taskService.GetAllUsersExceptSelf();
+            ViewBag.PriorityList = await _taskService.GetAllTaskPriorities();
+            ViewBag.StatusList = await _taskService.GetAllTaskStatuses();
+            ViewBag.UserList = await _taskService.GetAllUsersExceptSelf();
 
             return View(task);
 

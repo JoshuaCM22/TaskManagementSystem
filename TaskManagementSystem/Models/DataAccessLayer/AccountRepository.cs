@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Linq;
+using System.Data.Entity;
+using System.Threading.Tasks;
 using TaskManagementSystem.Context;
 using TaskManagementSystem.Models.DatabaseModels;
 using TaskManagementSystem.Models.Interfaces;
@@ -14,32 +15,31 @@ namespace TaskManagementSystem.Models.DataAccessLayer
             _dbContext = dbContext;
         }
 
-        public void CreateAccount(Users users)
+        public async Task CreateAccount(Users users)
         {
             _dbContext.Users.Add(users);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
 
-
-        public bool VerifyAccount(Users users)
+        public async Task<bool> VerifyAccount(Users users)
         {
-            var user = _dbContext.Users.ToList().SingleOrDefault(s => s.Username == users.Username);
+            var user = await _dbContext.Users.SingleOrDefaultAsync(s => s.Username == users.Username);
             if (user == null) return false;
             if (user.Password == users.Password) return true;
             return false;
         }
 
-        public Users GetUsers(string username)
+        public async Task<bool> IsAdmin(string username)
         {
-            return _dbContext.Users.SingleOrDefault(x => x.Username == username);
-        }
-
-        public bool IsAdmin(string username)
-        {
-            var user = _dbContext.Users.ToList().SingleOrDefault(s => s.Username == username);
+            var user = await _dbContext.Users.SingleOrDefaultAsync(s => s.Username == username);
             return (user.RoleID == 1);
         }
 
+        public async Task<bool> IsUsernameExist(string username)
+        {
+            int count = await _dbContext.Users.CountAsync(x => x.Username == username);
+            return (count > 0);
+        }
 
         // Dispose this context when this repository is no longer needed. To avoid increased memory usage.
         public void Dispose()

@@ -1,9 +1,9 @@
 ﻿@model TaskManagementSystem.Models.ViewModels.TaskViewModel
 @{
-    ViewBag.Title = "Delete Confirmation";
+    ViewBag.Title = "Delete Task Confirmation";
 }
 
-<h2>Delete Confirmation</h2>
+<h2>Delete Task Confirmation</h2>
 
 @using (Html.BeginForm())
 {
@@ -46,7 +46,7 @@
     <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
             <input type="submit" value="Delete" class="btn btn-primary" />
-            @Html.ActionLink("Cancel", "TaskList", null, new { @class = "btn btn-danger" })
+            @Html.ActionLink("Cancel", "YourTaskList", null, new { @class = "btn btn-danger" })
         </div>
     </div>
 </div>

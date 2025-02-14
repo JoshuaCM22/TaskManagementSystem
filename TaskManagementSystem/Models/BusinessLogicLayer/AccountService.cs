@@ -1,4 +1,6 @@
-﻿using TaskManagementSystem.Models.DatabaseModels;
+﻿using System;
+using System.Threading.Tasks;
+using TaskManagementSystem.Models.DatabaseModels;
 using TaskManagementSystem.Models.Interfaces;
 using TaskManagementSystem.Models.ViewModels;
 
@@ -13,22 +15,28 @@ namespace TaskManagementSystem.Models.BusinessLogicLayer
             _accountRepository = accountRepository;
         }
 
-        public void Register(RegisterViewModel viewModel)
+        public async Task Register(RegisterViewModel viewModel)
         {
             Users user = new Users() { Username = viewModel.Username, Password = viewModel.Password, RoleID = 2 }; // 2 = Regular User
-            _accountRepository.CreateAccount(user);
+            await _accountRepository.CreateAccount(user);
         }
 
 
-        public bool Login(LoginViewModel viewModel)
+        public async Task<bool> Login(LoginViewModel viewModel)
         {
             Users user = new Users() { Username = viewModel.Username, Password = viewModel.Password };
-            return _accountRepository.VerifyAccount(user);
+            return await _accountRepository.VerifyAccount(user);
         }
 
-        public bool IsAdmin(string username)
+        public async Task<bool> IsAdmin(string username)
         {
-            return _accountRepository.IsAdmin(username);
+            return await _accountRepository.IsAdmin(username);
+        }
+
+        public async Task<bool> IsUsernameExist(string username)
+        {
+            if (string.IsNullOrEmpty(username)) throw new Exception("The username cannot be null or empty string.");
+            return await _accountRepository.IsUsernameExist(username.Trim());
         }
 
     }

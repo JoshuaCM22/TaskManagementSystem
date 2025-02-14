@@ -241,19 +241,18 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Account\Register.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
-    <Content Include="Views\Task\TaskList.cshtml" />
-    <Content Include="Views\Task\CreateTask.cshtml" />
+    <Content Include="Views\Task\YourTaskList.cshtml" />
+    <Content Include="Views\Task\CreateNew.cshtml" />
     <Content Include="Views\Task\Edit.cshtml" />
-    <Content Include="Views\Admin\TaskList.cshtml" />
+    <Content Include="Views\Admin\AllTaskList.cshtml" />
     <Content Include="Views\Admin\Delete.cshtml" />
     <Content Include="Views\Home\PageNotFound.cshtml" />
     <Content Include="Views\Admin\Edit.cshtml" />
     <Content Include="Views\Task\Delete.cshtml" />
-    <Content Include="Views\Admin\CreateTask.cshtml" />
+    <Content Include="Views\Admin\CreateNew.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\DomainModels\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

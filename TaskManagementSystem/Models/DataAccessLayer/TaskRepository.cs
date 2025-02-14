@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using TaskManagementSystem.Context;
 using TaskManagementSystem.Models.DatabaseModels;
@@ -19,12 +20,12 @@ namespace TaskManagementSystem.Models.DataAccessLayer
         }
 
 
-        public List<Tasks> GetAllTasks()
+        public async Task<List<Tasks>> GetAllTasks()
         {
-            var tasks = _dbContext.Tasks.ToList();
-            var users = _dbContext.Users.ToList();
-            var taskStatuses = _dbContext.TaskStatuses.ToList();
-            var taskPriorities = _dbContext.TaskPriorities.ToList();
+            var tasks = await _dbContext.Tasks.ToListAsync();
+            var users = await _dbContext.Users.ToListAsync();
+            var taskStatuses = await _dbContext.TaskStatuses.ToListAsync();
+            var taskPriorities = await _dbContext.TaskPriorities.ToListAsync();
 
             return tasks
                 // First join: Tasks with Users
@@ -72,58 +73,58 @@ namespace TaskManagementSystem.Models.DataAccessLayer
         }
 
 
-        public List<Tasks> GetAllTasks(int userId)
+        public async Task<List<Tasks>> GetAllTasks(int userId)
         {
-            return _dbContext.Tasks.Where(x => x.UserID == userId).ToList();
+            return await _dbContext.Tasks.Where(x => x.UserID == userId).ToListAsync();
         }
 
 
-        public List<Tasks> GetAllTasks(string username)
+        public async Task<List<Tasks>> GetAllTasks(string username)
         {
-            var _user = _dbContext.Users.ToList().SingleOrDefault(s => s.Username == username);
+            var _user = await _dbContext.Users.SingleOrDefaultAsync(s => s.Username == username);
             if (_user == null) return new List<Tasks>();
-            return _dbContext.Tasks.Where(x => x.UserID == _user.ID).ToList();
+            return await _dbContext.Tasks.Where(x => x.UserID == _user.ID).ToListAsync();
         }
 
 
-        public List<TaskStatuses> GetAllTaskStatuses()
+        public async Task<List<TaskStatuses>> GetAllTaskStatuses()
         {
-            return _dbContext.TaskStatuses.ToList();
+            return await _dbContext.TaskStatuses.ToListAsync();
         }
 
-        public List<TaskPriorities> GetAllTaskPriorities()
+        public async Task<List<TaskPriorities>> GetAllTaskPriorities()
         {
-            return _dbContext.TaskPriorities.ToList();
+            return await _dbContext.TaskPriorities.ToListAsync();
         }
 
-        public List<Users> GetAllUsersExceptSelf()
+        public async Task<List<Users>> GetAllUsersExceptSelf()
         {
-            return _dbContext.Users.Where(u => u.Username != HttpContext.Current.User.Identity.Name).ToList();
+            return await _dbContext.Users.Where(u => u.Username != HttpContext.Current.User.Identity.Name).ToListAsync();
         }
 
-        public Tasks GetTask(int taskId)
+        public async Task<Tasks> GetTask(int taskId)
         {
-            return _dbContext.Tasks.SingleOrDefault(x => x.ID == taskId);
+            return await _dbContext.Tasks.SingleOrDefaultAsync(x => x.ID == taskId);
         }
 
 
-        public int GetUserID(string username)
+        public async Task<int> GetUserID(string username)
         {
-            return (_dbContext.Users.SingleOrDefault(x => x.Username == username)).ID;
+            return (await _dbContext.Users.SingleOrDefaultAsync(x => x.Username == username)).ID;
         }
 
 
-        public void CreateTask(Tasks task)
+        public async Task CreateTask(Tasks task)
         {
             using (var transaction = _dbContext.Database.BeginTransaction())
             {
                 try
                 {
                     _dbContext.Tasks.Add(task);
-                    if (_dbContext.SaveChanges() <= 0) throw new Exception("No rows affected.");
+                    if (await _dbContext.SaveChangesAsync() <= 0) throw new Exception("No rows affected.");
 
-                    _dbContext.TaskLogs.Add(GetTaskLogsObject(task, 1)); // 1 = Insert
-                    if (_dbContext.SaveChanges() <= 0) throw new Exception("No rows affected.");
+                    _dbContext.TaskLogs.Add(await GetTaskLogsObject(task, 1)); // 1 = Insert
+                    if (await _dbContext.SaveChangesAsync() <= 0) throw new Exception("No rows affected.");
 
                     transaction.Commit();
                 }
@@ -135,17 +136,17 @@ namespace TaskManagementSystem.Models.DataAccessLayer
             }
         }
 
-        public void UpdateTask(Tasks task)
+        public async Task UpdateTask(Tasks task)
         {
             using (var transaction = _dbContext.Database.BeginTransaction())
             {
                 try
                 {
                     _dbContext.Entry(task).State = EntityState.Modified;
-                    if (_dbContext.SaveChanges() <= 0) throw new Exception("No rows affected.");
+                    if (await _dbContext.SaveChangesAsync() <= 0) throw new Exception("No rows affected.");
 
-                    _dbContext.TaskLogs.Add(GetTaskLogsObject(task, 2)); // 2 = Update
-                    if (_dbContext.SaveChanges() <= 0) throw new Exception("No rows affected.");
+                    _dbContext.TaskLogs.Add(await GetTaskLogsObject(task, 2)); // 2 = Update
+                    if (await _dbContext.SaveChangesAsync() <= 0) throw new Exception("No rows affected.");
 
                     transaction.Commit();
                 }
@@ -158,18 +159,17 @@ namespace TaskManagementSystem.Models.DataAccessLayer
 
         }
 
-        public void DeleteTask(int taskId)
+        public async Task DeleteTask(Tasks task)
         {
             using (var transaction = _dbContext.Database.BeginTransaction())
             {
                 try
                 {
-                    var task = GetTask(taskId);
                     _dbContext.Entry(task).State = EntityState.Deleted;
-                    if (_dbContext.SaveChanges() <= 0) throw new Exception("No rows affected.");
+                    if (await _dbContext.SaveChangesAsync() <= 0) throw new Exception("No rows affected.");
 
-                    _dbContext.TaskLogs.Add(GetTaskLogsObject(task, 3)); // 3 = Delete
-                    if (_dbContext.SaveChanges() <= 0) throw new Exception("No rows affected.");
+                    _dbContext.TaskLogs.Add(await GetTaskLogsObject(task, 3)); // 3 = Delete
+                    if (await _dbContext.SaveChangesAsync() <= 0) throw new Exception("No rows affected.");
 
                     transaction.Commit();
                 }
@@ -181,7 +181,7 @@ namespace TaskManagementSystem.Models.DataAccessLayer
             }
         }
 
-        public TaskLogs GetTaskLogsObject(Tasks task, byte actionID)
+        public async Task<TaskLogs> GetTaskLogsObject(Tasks task, byte actionID)
         {
             var taskLogs = new TaskLogs();
             taskLogs.Title = task.Title;
@@ -192,7 +192,7 @@ namespace TaskManagementSystem.Models.DataAccessLayer
             taskLogs.UserID = task.UserID;
             taskLogs.ActionID = actionID;
             taskLogs.DateTimeCreated = DateTime.Now;
-            taskLogs.CreatedBy = _dbContext.Users.SingleOrDefault(x => x.Username == HttpContext.Current.User.Identity.Name).ID;
+            taskLogs.CreatedBy = (await _dbContext.Users.SingleOrDefaultAsync(x => x.Username == HttpContext.Current.User.Identity.Name)).ID;
             return taskLogs;
         }
 

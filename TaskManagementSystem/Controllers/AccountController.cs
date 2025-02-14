@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using System.Web.Security;
 using TaskManagementSystem.Models.Interfaces;
@@ -25,19 +26,25 @@ namespace TaskManagementSystem.Controllers
                 var viewModels = new RegisterViewModel();
                 return View(viewModels);
             }
-            return RedirectToAction("task-list", "task");
+            return RedirectToAction("your-task-list", "task");
         }
 
         [Route("register")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Register(RegisterViewModel viewModel)
+        public async Task<ActionResult> Register(RegisterViewModel viewModel)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    _accountService.Register(viewModel);
+                    if (await _accountService.IsUsernameExist(viewModel.Username))
+                    {
+                        TempData["errorMessage"] = "This username is already taken. Please use a different username.";
+                        return View(viewModel);
+                    }
+
+                    await _accountService.Register(viewModel);
                     TempData["successMessage"] = "Successfully Created";
                     return RedirectToAction("login", "account");
                 }
@@ -59,25 +66,25 @@ namespace TaskManagementSystem.Controllers
                 var viewModels = new LoginViewModel();
                 return View(viewModels);
             }
-            return RedirectToAction("task-list", "task");
+            return RedirectToAction("your-task-list", "task");
         }
 
         [Route("login")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Login(LoginViewModel viewModel)
+        public async Task<ActionResult> Login(LoginViewModel viewModel)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    if (_accountService.Login(viewModel))
+                    if (await _accountService.Login(viewModel))
                     {
                         FormsAuthentication.SetAuthCookie(viewModel.Username, true);
-                        if (_accountService.IsAdmin(viewModel.Username)) return RedirectToAction("task-list", "admin");
-                        return RedirectToAction("task-list", "task");
+                        if (await _accountService.IsAdmin(viewModel.Username)) return RedirectToAction("all-task-list", "admin");
+                        return RedirectToAction("your-task-list", "task");
                     }
-                    TempData["errorMessage"] = "Invalid Username and/or Password";
+                    TempData["errorMessage"] = "Incorrect Username and/or Password";
                 }
             }
             catch (Exception ex)

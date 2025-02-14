@@ -24,7 +24,7 @@
                     @{
                         if (!string.IsNullOrEmpty(User.Identity.Name))
                         {
-                            <li>@Html.ActionLink("Username: " + User.Identity.Name, "task-list", "task", new { area = "" }, new { @class = "nav-link" })</li>
+                            <li>@Html.ActionLink("Username: " + User.Identity.Name, "your-task-list", "task", new { area = "" }, new { @class = "nav-link" })</li>
                             <li>@Html.ActionLink("Logout", "Logout", "Account", new { area = "" }, new { @class = "nav-link" })</li>
                         }
                         else

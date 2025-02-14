@@ -1,11 +1,13 @@
-﻿using TaskManagementSystem.Models.ViewModels;
+﻿using System.Threading.Tasks;
+using TaskManagementSystem.Models.ViewModels;
 
 namespace TaskManagementSystem.Models.Interfaces
 {
     public interface IAccountService
     {
-        void Register(RegisterViewModel viewModel);
-        bool Login(LoginViewModel viewModel);
-        bool IsAdmin(string username);
+        Task Register(RegisterViewModel viewModel);
+        Task<bool> Login(LoginViewModel viewModel);
+        Task<bool> IsAdmin(string username);
+        Task<bool> IsUsernameExist(string username);
     }
 }

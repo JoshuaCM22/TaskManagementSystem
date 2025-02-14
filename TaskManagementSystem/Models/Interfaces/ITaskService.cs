@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using TaskManagementSystem.Models.ViewModels;
 
@@ -6,14 +7,14 @@ namespace TaskManagementSystem.Models.Interfaces
 {
     public interface ITaskService
     {
-        List<TaskViewModel> GetAllTasks();
-        List<TaskViewModel> GetAllTasksByUsername(string username);
-        TaskViewModel GetTaskById(int taskId);
-        void CreateTask(TaskViewModel taskViewModel);
-        void UpdateTask(TaskViewModel taskViewModel);
-        void DeleteTask(int taskId);
-        IEnumerable<SelectListItem> GetAllTaskPriorities();
-        IEnumerable<SelectListItem> GetAllTaskStatuses();
-        IEnumerable<SelectListItem> GetAllUsersExceptSelf();   
+        Task<List<TaskViewModel>> GetAllTasks();
+        Task<List<TaskViewModel>> GetAllTasksByUsername(string username);
+        Task<TaskViewModel> GetTaskById(int taskId);
+        Task CreateTask(TaskViewModel taskViewModel);
+        Task UpdateTask(TaskViewModel taskViewModel);
+        Task DeleteTask(TaskViewModel taskViewModel);
+        Task<IEnumerable<SelectListItem>> GetAllTaskPriorities();
+        Task<IEnumerable<SelectListItem>> GetAllTaskStatuses();
+        Task<IEnumerable<SelectListItem>> GetAllUsersExceptSelf();
     }
 }

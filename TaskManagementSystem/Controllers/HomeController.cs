@@ -9,7 +9,7 @@ namespace TaskManagementSystem.Controllers
         [HttpGet]
         public ActionResult Index()
         {
-            return RedirectToAction("TaskList", "Task");
+            return RedirectToAction("your-task-list", "task");
         }
 
         [HttpGet]

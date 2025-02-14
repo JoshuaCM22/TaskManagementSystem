@@ -1,21 +1,22 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using TaskManagementSystem.Models.DatabaseModels;
 
 namespace TaskManagementSystem.Models.Interfaces
 {
     public interface ITaskRepository
     {
-        List<Tasks> GetAllTasks();
-        List<Tasks> GetAllTasks(int userId);
-        List<Tasks> GetAllTasks(string username);
-        List<TaskStatuses> GetAllTaskStatuses();
-        List<TaskPriorities> GetAllTaskPriorities();
-        List<Users> GetAllUsersExceptSelf();
-        Tasks GetTask(int taskId);
-        int GetUserID(string username);
-        void CreateTask(Tasks task);
-        void UpdateTask(Tasks task);
-        void DeleteTask(int taskId);
-        TaskLogs GetTaskLogsObject(Tasks task, byte actionID);
+        Task<List<Tasks>> GetAllTasks();
+        Task<List<Tasks>> GetAllTasks(int userId);
+        Task<List<Tasks>> GetAllTasks(string username);
+        Task<List<TaskStatuses>> GetAllTaskStatuses();
+        Task<List<TaskPriorities>> GetAllTaskPriorities();
+        Task<List<Users>> GetAllUsersExceptSelf();
+        Task<Tasks> GetTask(int taskId);
+        Task<int> GetUserID(string username);
+        Task CreateTask(Tasks task);
+        Task UpdateTask(Tasks task);
+        Task DeleteTask(Tasks task);
+        Task<TaskLogs> GetTaskLogsObject(Tasks task, byte actionID);
     }
 }
