@@ -3,12 +3,19 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/ico" href="@Url.Content("~/Content/Images/favicon.ico")">
+
     <title>@ViewBag.Title - Task Management System</title>
-    @Styles.Render("~/Content/css")
+
+    @Styles.Render("~/Styles/Bootstrap/bootstrap.css")
+    @Styles.Render("~/Styles/ToastR/toastr.min.css")
+    @Styles.Render("~/Styles/FontAwesome/css/all.min.css")
+    @Styles.Render("~/Styles/Custom/sortTable.css?v=1")
+    @Styles.Render("~/Styles/Custom/main.css?v=1")
+
     @Scripts.Render("~/bundles/modernizr")
-    <link rel="icon" href="~/favicon.ico" />
-    <link href="~/Content/toastr.min.css" rel="stylesheet" />
-    <link href="~/ManuallyIncludedLibraries/fontawesome-free-6.4.2-web/css/all.min.css" rel="stylesheet" />
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
 
 </head>
 <body>
@@ -17,7 +24,7 @@
 
             <a href="@Url.Action("Dashboard", User.IsInRole("Admin") ? "Admin" : "Task")" class="nav-link">
                 <label class="navbar-brand" style="cursor: pointer;">
-                    <img src="~/favicon.ico" style="height: 30px; width: 30px;" alt="Alternate Text" />
+                    <img src="~/Content/Images/favicon.ico" style="height: 30px; width: 30px;" alt="Alternate Text" />
                     Task Management System
                 </label>
             </a>
@@ -93,10 +100,9 @@
         </footer>
     </div>
 
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
-    <script src="~/Scripts/toastr.js"></script>
-    <script src="~/Scripts/main.js"></script>
+    @Scripts.Render("~/Scripts/ToastR/toastr.min.js")
+    @Scripts.Render("~/Scripts/Custom/sortTable.js?v=1")
+    @Scripts.Render("~/Scripts/Custom/main.js?v=1")
     @RenderSection("scripts", required: false)
 </body>
 </html>

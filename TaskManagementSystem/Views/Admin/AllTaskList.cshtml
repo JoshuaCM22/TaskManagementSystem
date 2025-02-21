@@ -115,17 +115,17 @@
     <p class="text-center fw-bolder">Total Rows: @Model.Count().ToString("#,##0")</p>
 
     <div class="table-responsive">
-        <table class="table table-hover table-bordered table-sm text-center align-middle">
+        <table id="sortTable" class="table table-hover table-bordered table-sm text-center align-middle">
             <thead class="table-dark">
                 <tr>
-                    <th style="width: 6%;">Task ID</th>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Date Created</th>
-                    <th>Due Date</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                    <th>Username</th>
+                    <th id="sortTableHeader1" class="sortTableHeader" style="width: 6%;">Task ID</th>
+                    <th id="sortTableHeader2" class="sortTableHeader">Title</th>
+                    <th id="sortTableHeader3" class="sortTableHeader">Description</th>
+                    <th id="sortTableHeader4" class="sortTableHeader">Date Created</th>
+                    <th id="sortTableHeader5" class="sortTableHeader">Due Date</th>
+                    <th id="sortTableHeader6" class="sortTableHeader">Priority</th>
+                    <th id="sortTableHeader7" class="sortTableHeader">Status</th>
+                    <th id="sortTableHeader8" class="sortTableHeader">Username</th>
                     <th style="width: 17%;">Action</th>
                 </tr>
             </thead>
