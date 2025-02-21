@@ -7,8 +7,6 @@ using System.Web;
 using TaskManagementSystem.Context;
 using TaskManagementSystem.Models.DatabaseModels;
 using TaskManagementSystem.Models.Interfaces;
-
-
 namespace TaskManagementSystem.Models.DataAccessLayer
 {
     public class TaskRepository : ITaskRepository, IDisposable
@@ -19,11 +17,30 @@ namespace TaskManagementSystem.Models.DataAccessLayer
             _dbContext = dbContext;
         }
 
-
-        public async Task<List<Tasks>> GetAllTasks()
+        public async Task<int> GetTasksCount(DateTime fromDate, DateTime toDate, int statusID, int userID)
         {
-            var tasks = await _dbContext.Tasks.ToListAsync();
+            var tasks = await _dbContext.Tasks
+                  .Where(x => DbFunctions.TruncateTime(x.DateTimeCreated) >= fromDate.Date
+                   && DbFunctions.TruncateTime(x.DateTimeCreated) <= toDate.Date)
+                  .ToListAsync();
+            if (statusID > 0) tasks = tasks.Where(x => x.TaskStatusID == statusID).ToList();
+            if (userID > 0) tasks = tasks.Where(x => x.UserID == userID).ToList();
+            return tasks.Count();
+        }
+
+        public async Task<List<Tasks>> GetAllTasks(DateTime fromDate, DateTime toDate, int statusID, int userID)
+        {
+            var tasks = await _dbContext.Tasks
+                    .Where(x => DbFunctions.TruncateTime(x.DateTimeCreated) >= fromDate.Date
+                     && DbFunctions.TruncateTime(x.DateTimeCreated) <= toDate.Date)
+                    .ToListAsync();
+
+            if (statusID > 0) tasks = tasks.Where(x => x.TaskStatusID == statusID).ToList();
+
             var users = await _dbContext.Users.ToListAsync();
+
+            if (userID > 0) users = users.Where(x => x.ID == userID).ToList();
+
             var taskStatuses = await _dbContext.TaskStatuses.ToListAsync();
             var taskPriorities = await _dbContext.TaskPriorities.ToListAsync();
 
@@ -49,6 +66,7 @@ namespace TaskManagementSystem.Models.DataAccessLayer
                     ID = x.TaskEntity.ID,
                     Title = x.TaskEntity.Title,
                     Description = x.TaskEntity.Description,
+                    DateTimeCreated = x.TaskEntity.DateTimeCreated,
                     DueDate = x.TaskEntity.DueDate,
                     TaskPriorityID = x.TaskEntity.TaskPriorityID, // ✅ Fixed incorrect mapping
 
@@ -79,12 +97,29 @@ namespace TaskManagementSystem.Models.DataAccessLayer
         }
 
 
-        public async Task<List<Tasks>> GetAllTasks(string username)
+        public async Task<List<Tasks>> GetAllTasks(string username, DateTime fromDate, DateTime toDate, int statusID)
         {
             var _user = await _dbContext.Users.SingleOrDefaultAsync(s => s.Username == username);
             if (_user == null) return new List<Tasks>();
-            return await _dbContext.Tasks.Where(x => x.UserID == _user.ID).ToListAsync();
+
+            if (statusID > 0)
+            {
+                return await _dbContext.Tasks.Where(x => x.UserID == _user.ID
+                         && DbFunctions.TruncateTime(x.DateTimeCreated) >= fromDate.Date
+                         && DbFunctions.TruncateTime(x.DateTimeCreated) <= toDate.Date
+                         && x.TaskStatusID == statusID
+                         )
+                     .ToListAsync();
+            }
+
+            return await _dbContext.Tasks
+                      .Where(x => x.UserID == _user.ID
+                       && DbFunctions.TruncateTime(x.DateTimeCreated) >= fromDate.Date
+                       && DbFunctions.TruncateTime(x.DateTimeCreated) <= toDate.Date
+                       )
+                   .ToListAsync();
         }
+
 
 
         public async Task<List<TaskStatuses>> GetAllTaskStatuses()
@@ -101,6 +136,12 @@ namespace TaskManagementSystem.Models.DataAccessLayer
         {
             return await _dbContext.Users.Where(u => u.Username != HttpContext.Current.User.Identity.Name).ToListAsync();
         }
+
+        public async Task<List<Users>> GetAllUsers()
+        {
+            return await _dbContext.Users.ToListAsync();
+        }
+
 
         public async Task<Tasks> GetTask(int taskId)
         {

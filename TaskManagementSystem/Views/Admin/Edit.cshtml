@@ -63,7 +63,7 @@
     <div class="form-group">
         @Html.LabelFor(model => model.UserName, htmlAttributes: new { @class = "control-label col-md-2" })
         <div class="col-md-10">
-            @Html.DropDownListFor(model => model.UserID, ViewBag.UserList as IEnumerable<SelectListItem>, "Select User", new { @class = "form-control" })
+            @Html.DropDownListFor(model => model.UserID, ViewBag.UserList as IEnumerable<SelectListItem>, "Select Username", new { @class = "form-control" })
             @Html.ValidationMessageFor(model => model.UserID, "", new { @class = "text-danger" })
         </div>
     </div>
@@ -71,8 +71,10 @@
     <br />
     <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
-            <input type="submit" value="Save" class="btn btn-primary" />
-            @Html.ActionLink("Cancel", "AllTaskList", null, new { @class = "btn btn-danger" })
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save" style="margin-right: 5px;"></i> Save</button>
+            <a href="@Url.Action("AllTaskList", "Admin")" class="btn btn-danger">
+                <i class="fas fa-times" style="margin-right: 5px;"></i> Cancel
+            </a>
         </div>
     </div>
 </div>

@@ -19,7 +19,7 @@ namespace TaskManagementSystem.Controllers
 
         [Route("all-task-list")]
         [HttpGet]
-        public async Task<ActionResult> AllTaskList()
+        public async Task<ActionResult> AllTaskList(DateTime? fromDate, DateTime? toDate, int? statusId, int? userId)
         {
             if (!User.Identity.IsAuthenticated) return RedirectToAction("login", "account");
 
@@ -27,7 +27,11 @@ namespace TaskManagementSystem.Controllers
 
             try
             {
-                taskList = await _taskService.GetAllTasks();
+                if (!fromDate.HasValue) fromDate = DateTime.Now.AddMonths(-1);
+                if (!toDate.HasValue) toDate = DateTime.Now;
+                ViewBag.StatusList = await _taskService.GetAllTaskStatuses(true);
+                ViewBag.UserList = await _taskService.GetAllUsers();
+                taskList = await _taskService.GetAllTasks(fromDate.Value, toDate.Value, statusId ?? 0, userId ?? 0);
             }
             catch (Exception ex)
             {
@@ -37,6 +41,31 @@ namespace TaskManagementSystem.Controllers
             return View(taskList);
         }
 
+        [Route("dashboard")]
+        [HttpGet]
+        public async Task<ActionResult> Dashboard(DateTime? fromDate, DateTime? toDate, int? userId)
+        {
+            if (!User.Identity.IsAuthenticated) return RedirectToAction("login", "account");
+
+            DashboardViewModel dashboardViewModel = null;
+
+            try
+            {
+                if (!fromDate.HasValue) fromDate = DateTime.Now.AddMonths(-1);
+                if (!toDate.HasValue) toDate = DateTime.Now;
+                ViewBag.UserList = await _taskService.GetAllUsers();
+                dashboardViewModel = await _taskService.GetDashboardData(fromDate.Value, toDate.Value, userId ?? 0);
+            }
+            catch (Exception ex)
+            {
+                TempData["errorMessage"] = "An error has occured in AllTaskList(). Error Message: " + ex.Message;
+            }
+
+            return View(dashboardViewModel);
+        }
+
+
+
         [Route("create-new")]
         [HttpGet]
         public async Task<ActionResult> CreateNew()
@@ -44,9 +73,11 @@ namespace TaskManagementSystem.Controllers
             if (!User.Identity.IsAuthenticated) return RedirectToAction("login", "account");
 
             var viewModel = new TaskViewModel();
-            viewModel.TaskPriorityID = 1;
+            viewModel.TaskPriorityID = 3; // 3 = High
+            viewModel.TaskStatusID = 1; // 1 = Pending
             ViewBag.PriorityList = await _taskService.GetAllTaskPriorities();
             ViewBag.UserList = await _taskService.GetAllUsersExceptSelf();
+            ViewBag.StatusList = await _taskService.GetAllTaskStatuses();
             return View(viewModel);
         }
 
@@ -59,7 +90,6 @@ namespace TaskManagementSystem.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    task.TaskStatusID = 1;
                     await _taskService.CreateTask(task);
                     TempData["successMessage"] = "Successfully Created";
                     return RedirectToAction("all-task-list", "admin");
@@ -67,6 +97,7 @@ namespace TaskManagementSystem.Controllers
 
                 ViewBag.PriorityList = await _taskService.GetAllTaskPriorities();
                 ViewBag.UserList = await _taskService.GetAllUsersExceptSelf();
+                ViewBag.StatusList = await _taskService.GetAllTaskStatuses();
             }
             catch (Exception ex)
             {
@@ -136,7 +167,7 @@ namespace TaskManagementSystem.Controllers
                     TaskViewModel _task = await _taskService.GetTaskById(int.Parse(taskId.ToString()));
                     ViewBag.PriorityList = await _taskService.GetAllTaskPriorities();
                     ViewBag.StatusList = await _taskService.GetAllTaskStatuses();
-                    ViewBag.UserList = await _taskService.GetAllUsersExceptSelf();
+                    ViewBag.UserList = await _taskService.GetAllUsers();
                     return View(_task);
                 }
                 catch (Exception ex)

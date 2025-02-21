@@ -16,9 +16,11 @@ namespace TaskManagementSystem.Models.ViewModels
         [Required(ErrorMessage ="Description is required")]
         public string Description { get; set; }
 
+        [Display(Name = "Date Created")]
+        public DateTime DateTimeCreated { get; set; }
 
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-ddTHH:mm}", ApplyFormatInEditMode = true)]
-        [Required(ErrorMessage = "Due Data is required")]
+        [Required(ErrorMessage = "Due Date is required")]
         [Display(Name = "Due Date")]
         public DateTime DueDate { get; set; }
 
@@ -28,6 +30,7 @@ namespace TaskManagementSystem.Models.ViewModels
 
         public string TaskPriorityName { get; set; }
 
+        [Required(ErrorMessage = "Status is required")]
         [Display(Name = "Status")]
         public byte TaskStatusID { get; set; }
 

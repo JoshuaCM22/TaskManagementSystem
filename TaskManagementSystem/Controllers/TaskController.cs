@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using TaskManagementSystem.Models.Interfaces;
@@ -18,24 +19,59 @@ namespace TaskManagementSystem.Controllers
             _taskService = taskService;
         }
 
+        [Authorize(Roles = "Regular User")]
+        [Route("dashboard")]
+        [HttpGet]
+        public async Task<ActionResult> Dashboard(DateTime? fromDate, DateTime? toDate)
+        {
+            if (!User.Identity.IsAuthenticated) return RedirectToAction("login", "account");
+
+            DashboardViewModel dashboardViewModel = null;
+
+            try
+            {
+                if (!fromDate.HasValue) fromDate = DateTime.Now.AddMonths(-1);
+                if (!toDate.HasValue) toDate = DateTime.Now;
+                int userID = await _taskService.GetUserID(User.Identity.Name);
+                dashboardViewModel = await _taskService.GetDashboardData(fromDate.Value, toDate.Value, userID);
+            }
+            catch (Exception ex)
+            {
+                TempData["errorMessage"] = "An error has occured in AllTaskList(). Error Message: " + ex.Message;
+            }
+
+            return View(dashboardViewModel);
+        }
+
+
+
         [Route("your-task-list")]
         [HttpGet]
-        public async Task<ActionResult> YourTaskList()
+        public async Task<ActionResult> YourTaskList(DateTime? fromDate, DateTime? toDate, int? statusId)
         {
             if (!User.Identity.IsAuthenticated) return RedirectToAction("login", "account");
 
             List<TaskViewModel> taskList = null;
             try
             {
-                taskList = await _taskService.GetAllTasksByUsername(User.Identity.Name);
+                if (!fromDate.HasValue) fromDate = DateTime.Now.AddMonths(-1);
+                if (!toDate.HasValue) toDate = DateTime.Now;
+
+                ViewBag.StatusList = await _taskService.GetAllTaskStatuses(true);
+
+                taskList = await _taskService.GetAllTasksByUsername(User.Identity.Name, fromDate.Value, toDate.Value, statusId ?? 0);
+
             }
             catch (Exception ex)
             {
-                TempData["errorMessage"] = "An error has occured in YourTaskList(). Error Message: " + ex.Message;
+                TempData["errorMessage"] = "An error has occurred in YourTaskList(). Error Message: " + ex.Message;
             }
 
             return View(taskList);
         }
+
+
+
 
         [Route("create-new")]
         [HttpGet]
@@ -44,12 +80,13 @@ namespace TaskManagementSystem.Controllers
             if (!User.Identity.IsAuthenticated) return RedirectToAction("login", "account");
 
             var viewModel = new TaskViewModel();
-            viewModel.TaskPriorityID = 1;
+            viewModel.TaskPriorityID = 3; // 3 = High
+            viewModel.TaskStatusID = 1; // 1 = Pending
 
             try
             {
                 ViewBag.PriorityList = await _taskService.GetAllTaskPriorities();
-                ViewBag.UserList = await _taskService.GetAllUsersExceptSelf();
+                ViewBag.StatusList = await _taskService.GetAllTaskStatuses();
             }
             catch (Exception ex)
             {
@@ -68,13 +105,13 @@ namespace TaskManagementSystem.Controllers
                 if (ModelState.IsValid)
                 {
                     task.UserName = User.Identity.Name;
-                    task.TaskStatusID = 1;
                     await _taskService.CreateTask(task);
                     TempData["successMessage"] = "Successfully Created";
                     return RedirectToAction("your-task-list", "task");
                 }
 
                 ViewBag.PriorityList = await _taskService.GetAllTaskPriorities();
+                ViewBag.StatusList = await _taskService.GetAllTaskStatuses();
             }
             catch (Exception ex)
             {

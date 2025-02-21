@@ -12,7 +12,7 @@ namespace TaskManagementSystem.Models.DatabaseModels
         public int ID { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public DateTime DueDate { get; set;}
+        public DateTime DueDate { get; set; }
 
         [ForeignKey("TaskPriority")]
         public byte TaskPriorityID { get; set; }
@@ -24,6 +24,7 @@ namespace TaskManagementSystem.Models.DatabaseModels
         [ForeignKey("User")]
         public int UserID { get; set; }
 
+        public DateTime DateTimeCreated { get; set; } = DateTime.Now;
 
         public virtual TaskPriorities TaskPriority { get; set; }
 

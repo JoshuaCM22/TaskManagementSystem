@@ -1,31 +1,128 @@
 ﻿@model IEnumerable<TaskManagementSystem.Models.ViewModels.TaskViewModel>
 @{
     ViewBag.Title = "Your Task List";
+    string fromDateValue = Request.QueryString["fromDate"] ?? DateTime.Now.AddMonths(-1).ToString("yyyy-MM-dd");
+    string toDateValue = Request.QueryString["toDate"] ?? DateTime.Now.ToString("yyyy-MM-dd");
+    bool isAdmin = User.IsInRole("Admin");
 }
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center">
-        <h2 class="fw-bold">Your Task List</h2>
-        @if (User.IsInRole("Admin"))
-        {
-            @Html.ActionLink("All Task List", "AllTaskList", "Admin", null, new { @class = "btn btn-dark btn-md" })
-        }
-    </div>
-    <br>
+    <div class="visible-xl">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="fw-bold me-auto"><i class="fas fa-clipboard-list"></i> Your Task List</h2>
 
-    @Html.ActionLink("Create New Task", "CreateNew", null, new { @class = "btn btn-primary btn-md mb-3" })
+            <div class="d-flex gap-2">
+
+                <a href="@Url.Action("Dashboard", (isAdmin) ? "Admin" : "Task")" class="btn btn-dark btn-md">
+                    <i class="fas fa-tachometer-alt" style="margin-right: 5px;"></i> Dashboard
+                </a>
+
+                @if (isAdmin)
+                {
+                    <a href="@Url.Action("AllTaskList", "Admin")" class="btn btn-dark btn-md">
+                        <i class="fas fa-clipboard-list" style="margin-right: 5px;"></i> All Task List
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="visible-xs visible-sm visible-md visible-lg">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+            <h2 class="fw-bold me-auto mb-3 mb-md-0">
+                <i class="fas fa-clipboard-list"></i> Your Task List
+            </h2>
+            <div class="d-flex gap-2 flex-column flex-md-row">
+                <a href="@Url.Action("Dashboard", (isAdmin) ? "Admin" : "Task")" class="btn btn-dark btn-md">
+                    <i class="fas fa-tachometer-alt" style="margin-right: 5px;"></i> Dashboard
+                </a>
+                @if (isAdmin)
+                {
+                    <a href="@Url.Action("AllTaskList", "Admin")" class="btn btn-dark btn-md">
+                        <i class="fas fa-clipboard-list" style="margin-right: 5px;"></i> All Task List
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="visible-lg visible-xl">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <form method="get" action="@Url.Action("YourTaskList", "Task")" class="d-flex gap-2">
+                <div>
+                    <label for="fromDate" class="form-label">From Date:</label>
+                    <input type="date" id="fromDate" name="fromDate" class="form-control" value="@fromDateValue">
+                </div>
+                <div>
+                    <label for="toDate" class="form-label">To Date:</label>
+                    <input type="date" id="toDate" name="toDate" class="form-control" value="@toDateValue">
+                </div>
+                <div style="width: 150px;">
+                    <label for="statusId" class="form-label">Status:</label>
+                    @Html.DropDownList("statusId", ViewBag.StatusList as IEnumerable<SelectListItem>, new { @class = "form-control" })
+                </div>
+                <div class="d-flex align-self-end">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search" style="margin-right: 5px;"></i> Search</button>
+                </div>
+            </form>
+
+            <a href="@Url.Action("CreateNew", "Task")" class="btn btn-primary btn-md">
+                <i class="fas fa-plus" style="margin-right: 5px;"></i> Create New Task
+            </a>
+        </div>
+    </div>
+
+    <div class="visible-xs visible-sm visible-md">
+        <div class="row align-items-end mb-3 g-2">
+            <div class="col-12 col-lg-auto">
+                <form method="get" action="@Url.Action("YourTaskList", "Task")" class="row g-2">
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-auto">
+                        <label for="fromDate" class="form-label">From Date:</label>
+                        <input type="date" id="fromDate" name="fromDate" class="form-control" value="@fromDateValue">
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-auto">
+                        <label for="toDate" class="form-label">To Date:</label>
+                        <input type="date" id="toDate" name="toDate" class="form-control" value="@toDateValue">
+                    </div>
+                    <div class="col-12 col-md-4 col-lg-auto">
+                        <label for="statusId" class="form-label">Status:</label>
+                        @Html.DropDownList("statusId", ViewBag.StatusList as IEnumerable<SelectListItem>, new { @class = "form-control" })
+                    </div>
+                    <div class="col-12 col-md-12">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-1"></i> Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-12 col-lg-auto text-lg-end">
+                <a href="@Url.Action("CreateNew", "Task")" class="btn btn-primary w-100 w-md-auto">
+                    <i class="fas fa-plus me-1"></i> Create New Task
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <p class="text-center fw-bolder">Total Rows: @Model.Count().ToString("#,##0")</p>
+
+
 
     <div class="table-responsive">
-        <table class="table table-hover table-bordered text-center align-middle">
+        <table class="table table-hover table-bordered table-sm text-center align-middle">
             <thead class="table-dark">
                 <tr>
                     <th style="width: 6%;">Task ID</th>
                     <th>Title</th>
                     <th>Description</th>
+                    <th>Date Created</th>
                     <th>Due Date</th>
                     <th>Priority</th>
                     <th>Status</th>
-                    <th style="width: 15%;">Action</th>
+                    <th style="width: 17%;">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,21 +134,21 @@
                             <td>@task.TaskId</td>
                             <td>@task.Title</td>
                             <td>@task.Description</td>
-                            <td>@task.DueDate</td>
+                            <td>@task.DateTimeCreated.ToString("MM/dd/yyyy hh:mm tt")</td>
+                            <td>@task.DueDate.ToString("MM/dd/yyyy hh:mm tt")</td>
 
                             @if (task.TaskPriorityName == "High")
                             {
-                                <td style="background-color: #cb4335; color: white; ">@task.TaskPriorityName</td>
+                                <td style="background-color: #cb4335; color: white;">@task.TaskPriorityName</td>
                             }
                             else if (task.TaskPriorityName == "Medium")
                             {
-                                <td style="background-color: #e67e22; color: white; ">@task.TaskPriorityName</td>
+                                <td style="background-color: #e67e22; color: white;">@task.TaskPriorityName</td>
                             }
                             else
                             {
-                                <td style="background-color: #27ae60; color: white; ">@task.TaskPriorityName</td>
+                                <td style="background-color: #27ae60; color: white;">@task.TaskPriorityName</td>
                             }
-
 
                             @if (task.TaskStatusName == "Completed")
                             {
@@ -59,11 +156,11 @@
                             }
                             else if (task.TaskStatusName == "Pending")
                             {
-                                <td style="background-color: Yellow; ">@task.TaskStatusName</td>
+                                <td style="background-color: Yellow;">@task.TaskStatusName</td>
                             }
                             else if (task.TaskStatusName == "In Progress")
                             {
-                                <td style="background-color: #40e7fa; ">@task.TaskStatusName</td>
+                                <td style="background-color: #40e7fa;">@task.TaskStatusName</td>
                             }
                             else if (task.TaskStatusName == "On Hold")
                             {
@@ -77,16 +174,21 @@
                             {
                                 <td>@task.TaskStatusName</td>
                             }
-                            <td>
-                                <a href="@Url.Action("edit", "task", new { taskId = task.TaskId })" class="btn btn-primary btn-md me-2">Edit</a>
-
-                                @if (User.IsInRole("Admin"))
-                                {
-                                    <a href="@Url.Action("Delete", "Task", new { taskId = task.TaskId })" class="btn btn-danger btn-md">Delete</a>
-                                }
+                            <td class="text-center">
+                                <div class="d-flex flex-column flex-md-row gap-2 justify-content-center">
+                                    <a href="@Url.Action("edit", "task", new { taskId = task.TaskId })" class="btn btn-primary btn-md">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a href="@Url.Action("Delete", "Task", new { taskId = task.TaskId })" class="btn btn-danger btn-md">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </a>
+                                    }
+                                </div>
                             </td>
-                        </tr>
 
+                        </tr>
                     }
                 }
                 else

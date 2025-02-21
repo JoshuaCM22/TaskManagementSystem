@@ -81,8 +81,8 @@ namespace TaskManagementSystem.Controllers
                     if (await _accountService.Login(viewModel))
                     {
                         FormsAuthentication.SetAuthCookie(viewModel.Username, true);
-                        if (await _accountService.IsAdmin(viewModel.Username)) return RedirectToAction("all-task-list", "admin");
-                        return RedirectToAction("your-task-list", "task");
+                        bool isAdmin = await _accountService.IsAdmin(viewModel.Username);
+                        return RedirectToAction("dashboard", (isAdmin) ? "admin" : "task");
                     }
                     TempData["errorMessage"] = "Incorrect Username and/or Password";
                 }

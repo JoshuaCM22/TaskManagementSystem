@@ -1,29 +1,132 @@
 ﻿@model IEnumerable<TaskManagementSystem.Models.ViewModels.TaskViewModel>
 @{
     ViewBag.Title = "All Task List";
+    string fromDateValue = Request.QueryString["fromDate"] ?? DateTime.Now.AddMonths(-1).ToString("yyyy-MM-dd");
+    string toDateValue = Request.QueryString["toDate"] ?? DateTime.Now.ToString("yyyy-MM-dd");
 }
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center">
-        <h2 class="fw-bold">All Task List</h2>
-        @Html.ActionLink("Your Task List", "YourTaskList", "Task", null, new { @class = "btn btn-dark btn-md" })
+    <div class="visible-xl">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="fw-bold me-auto"><i class="fas fa-clipboard-list"></i> All Task List</h2>
+
+            <div class="d-flex gap-2">
+
+                <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-dark btn-md">
+                    <i class="fas fa-tachometer-alt" style="margin-right: 5px;"></i> Dashboard
+                </a>
+                <a href="@Url.Action("YourTaskList", "Task")" class="btn btn-dark btn-md">
+                    <i class="fas fa-clipboard-list" style="margin-right: 5px;"></i> Your Task List
+                </a>
+
+            </div>
+        </div>
     </div>
+
+    <div class="visible-xs visible-sm visible-md visible-lg">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+            <h2 class="fw-bold me-auto mb-3 mb-md-0">
+                <i class="fas fa-clipboard-list"></i> All Task List
+            </h2>
+            <div class="d-flex gap-2 flex-column flex-md-row">
+                <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-dark btn-md">
+                    <i class="fas fa-tachometer-alt" style="margin-right: 5px;"></i> Dashboard
+                </a>
+                <a href="@Url.Action("YourTaskList", "Task")" class="btn btn-dark btn-md">
+                    <i class="fas fa-clipboard-list" style="margin-right: 5px;"></i> Your Task List
+                </a>
+            </div>
+        </div>
+    </div>
+
     <hr>
 
-    @Html.ActionLink("Create New Task To Other", "CreateNew", null, new { @class = "btn btn-primary btn-md mb-3" })
+    <div class="visible-xl">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <form method="get" action="@Url.Action("AllTaskList", "Admin")" class="d-flex gap-2">
+                <div>
+                    <label for="fromDate" class="form-label">From Date:</label>
+                    <input type="date" id="fromDate" name="fromDate" class="form-control" value="@fromDateValue">
+                </div>
+                <div>
+                    <label for="toDate" class="form-label">To Date:</label>
+                    <input type="date" id="toDate" name="toDate" class="form-control" value="@toDateValue">
+                </div>
+                <div style="width: 150px;">
+                    <label for="statusId" class="form-label">Status:</label>
+                    @Html.DropDownList("statusId", ViewBag.StatusList as IEnumerable<SelectListItem>, new { @class = "form-control" })
+                </div>
+                <div style="width: 200px;">
+                    <label for="userId" class="form-label">Username:</label>
+                    @Html.DropDownList("userId", ViewBag.UserList as IEnumerable<SelectListItem>, new { @class = "form-control" })
+                </div>
+                <div class="d-flex align-self-end">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search" style="margin-right: 5px;"></i> Search</button>
+                </div>
+            </form>
+
+
+            <a href="@Url.Action("CreateNew", "Admin")" class="btn btn-primary btn-md">
+                <i class="fas fa-plus" style="margin-right: 5px;"></i> Create New Task To Other
+            </a>
+        </div>
+    </div>
+
+    <div class="visible-xs visible-sm visible-md visible-lg">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex flex-wrap justify-content-between align-items-end mb-3">
+                        <form method="get" action="@Url.Action("AllTaskList", "Admin")" class="row g-2 w-100">
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <label for="fromDate" class="form-label">From Date:</label>
+                                <input type="date" id="fromDate" name="fromDate" class="form-control" value="@fromDateValue">
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <label for="toDate" class="form-label">To Date:</label>
+                                <input type="date" id="toDate" name="toDate" class="form-control" value="@toDateValue">
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-2">
+                                <label for="statusId" class="form-label">Status:</label>
+                                @Html.DropDownList("statusId", ViewBag.StatusList as IEnumerable<SelectListItem>, new { @class = "form-control" })
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-4">
+                                <label for="userId" class="form-label">Username:</label>
+                                @Html.DropDownList("userId", ViewBag.UserList as IEnumerable<SelectListItem>, new { @class = "form-control" })
+                            </div>
+                            <div class="col-12 col-md-12 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-search" style="margin-right: 5px;"></i> Search
+                                </button>
+                            </div>
+
+                            <div class="col-12 col-md-12 d-flex align-items-end">
+                                <a href="@Url.Action("CreateNew", "Admin")" class="btn btn-primary w-100">
+                                    <i class="fas fa-plus" style="margin-right: 5px;"></i> Create New Task To Other
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p class="text-center fw-bolder">Total Rows: @Model.Count().ToString("#,##0")</p>
 
     <div class="table-responsive">
-        <table class="table table-hover table-bordered text-center align-middle">
+        <table class="table table-hover table-bordered table-sm text-center align-middle">
             <thead class="table-dark">
                 <tr>
                     <th style="width: 6%;">Task ID</th>
                     <th>Title</th>
                     <th>Description</th>
+                    <th>Date Created</th>
                     <th>Due Date</th>
                     <th>Priority</th>
                     <th>Status</th>
                     <th>Username</th>
-                    <th style="width: 15%;">Action</th>
+                    <th style="width: 17%;">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -35,7 +138,8 @@
                             <td>@task.TaskId</td>
                             <td>@task.Title</td>
                             <td>@task.Description</td>
-                            <td>@task.DueDate</td>
+                            <td>@task.DateTimeCreated.ToString("MM/dd/yyyy hh:mm tt")</td>
+                            <td>@task.DueDate.ToString("MM/dd/yyyy hh:mm tt")</td>
 
                             @if (task.TaskPriorityName == "High")
                             {
@@ -76,9 +180,15 @@
                                 <td>@task.TaskStatusName</td>
                             }
                             <td>@task.UserName</td>
-                            <td>
-                                <a href="@Url.Action("Edit", "Admin", new { taskId = task.TaskId })" class="btn btn-primary btn-md me-2">Edit</a>
-                                <a href="@Url.Action("Delete", "Admin", new { taskId = task.TaskId })" class="btn btn-danger btn-md">Delete</a>
+                            <td class="text-center">
+                                <div class="d-flex flex-column flex-md-row gap-2 justify-content-center">
+                                    <a href="@Url.Action("Edit", "Admin", new { taskId = task.TaskId })" class="btn btn-primary btn-md me-2">
+                                        <i class="fas fa-edit" style="margin-right: 5px;"></i> Edit
+                                    </a>
+                                    <a href="@Url.Action("Delete", "Admin", new { taskId = task.TaskId })" class="btn btn-danger btn-md">
+                                        <i class="fas fa-trash" style="margin-right: 5px;"></i> Delete
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     }

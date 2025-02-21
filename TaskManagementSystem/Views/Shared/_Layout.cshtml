@@ -7,12 +7,21 @@
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
     <link rel="icon" href="~/favicon.ico" />
-    <link href="~/Content/toastr.css" rel="stylesheet" />
+    <link href="~/Content/toastr.min.css" rel="stylesheet" />
+    <link href="~/ManuallyIncludedLibraries/fontawesome-free-6.4.2-web/css/all.min.css" rel="stylesheet" />
+
 </head>
 <body>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
         <div class="container">
-            <label class="navbar-brand"><img src="~/favicon.ico" style="height: 30px; width: 30px;" alt="Alternate Text" /> Task Management System</label>
+
+            <a href="@Url.Action("Dashboard", User.IsInRole("Admin") ? "Admin" : "Task")" class="nav-link">
+                <label class="navbar-brand" style="cursor: pointer;">
+                    <img src="~/favicon.ico" style="height: 30px; width: 30px;" alt="Alternate Text" />
+                    Task Management System
+                </label>
+            </a>
+
             <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Toggle navigation" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -24,27 +33,47 @@
                     @{
                         if (!string.IsNullOrEmpty(User.Identity.Name))
                         {
-                            <li>@Html.ActionLink("Username: " + User.Identity.Name, "your-task-list", "task", new { area = "" }, new { @class = "nav-link" })</li>
-
-                            string userRole = "";
+                            string username = "Username: " + User.Identity.Name;
+                            string userRole = "User role: ";
                             if (User.IsInRole("Admin"))
                             {
-                                userRole = "Admin";
+                                userRole += "Admin";
                             }
                             else
                             {
-                                userRole = "Regular User";
+                                userRole += "Regular User";
                             }
 
-                            <li>@Html.ActionLink("User role: " + userRole, "your-task-list", "task", new { area = "" }, new { @class = "nav-link" })</li>
+                            <li>
+                                <a href="@Url.Action("YourTaskList", "Task")" class="nav-link">
+                                    <i class="fas fa-user" style="margin-right: 5px;"></i> @username
+                                </a>
+                            </li>
+                            <li>
+                                <a href="@Url.Action("AllTaskList", "Admin")" class="nav-link">
+                                    <i class="fas fa-user-tag" style="margin-right: 5px;"></i> @userRole
+                                </a>
+                            </li>
 
-                            <li>@Html.ActionLink("Logout", "Logout", "Account", new { area = "" }, new { @class = "nav-link" })</li>
+                            <li>
+                                <a href="@Url.Action("Logout", "Account")" class="nav-link">
+                                    <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i> Logout
+                                </a>
+                            </li>
                         }
                         else
                         {
+                            <li>
+                                <a href="@Url.Action("Login", "Account")" class="nav-link">
+                                    <i class="fas fa-sign-in-alt" style="margin-right: 5px;"></i> Login
+                                </a>
+                            </li>
 
-                            <li>@Html.ActionLink("Login", "Login", "Account", new { area = "" }, new { @class = "nav-link" })</li>
-                            <li>@Html.ActionLink("Register", "Register", "Account", new { area = "" }, new { @class = "nav-link" })</li>
+                            <li>
+                                <a href="@Url.Action("Register", "Account")" class="nav-link">
+                                    <i class="fas fa-user-plus" style="margin-right: 5px;"></i> Register
+                                </a>
+                            </li>
                         }
                     }
                 </ul>

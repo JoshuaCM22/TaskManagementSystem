@@ -1,0 +1,183 @@
+﻿@model TaskManagementSystem.Models.ViewModels.DashboardViewModel
+@using System.Configuration
+
+@{
+    ViewBag.Title = "Dashboard";
+    string fromDateValue = Request.QueryString["fromDate"] ?? DateTime.Now.AddMonths(-1).ToString("yyyy-MM-dd");
+    string toDateValue = Request.QueryString["toDate"] ?? DateTime.Now.ToString("yyyy-MM-dd");
+    string routeFolder = ConfigurationManager.AppSettings["RouteFolder"];
+}
+
+
+<div class="mt-4">
+    <div class="visible-xl">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="fw-bold me-auto"><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("YourTaskList", "Task")" class="btn btn-dark btn-md">
+                    <i class="fas fa-clipboard-list" style="margin-right: 5px;"></i> Your Task List
+                </a>
+                <a href="@Url.Action("AllTaskList", "Admin")" class="btn btn-dark btn-md">
+                    <i class="fas fa-clipboard-list" style="margin-right: 5px;"></i> All Task List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="visible-xs visible-sm visible-md visible-lg">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+            <h2 class="fw-bold me-auto mb-3 mb-md-0">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </h2>
+            <div class="d-flex gap-2 flex-column flex-md-row">
+                <a href="@Url.Action("YourTaskList", "Task")" class="btn btn-dark btn-md">
+                    <i class="fas fa-clipboard-list me-2"></i> Your Task List
+                </a>
+                <a href="@Url.Action("AllTaskList", "Admin")" class="btn btn-dark btn-md">
+                    <i class="fas fa-clipboard-list me-2"></i> All Task List
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+    <hr>
+
+    <div class="visible-xl">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <form method="get" action="@Url.Action("Dashboard", "Admin")" class="d-flex gap-2">
+                <div>
+                    <label for="fromDate" class="form-label">From Date:</label>
+                    <input type="date" id="fromDate" name="fromDate" class="form-control" value="@fromDateValue">
+                </div>
+                <div>
+                    <label for="toDate" class="form-label">To Date:</label>
+                    <input type="date" id="toDate" name="toDate" class="form-control" value="@toDateValue">
+                </div>
+                <div style="width: 200px;">
+                    <label for="userId" class="form-label">Username:</label>
+                    @Html.DropDownList("userId", ViewBag.UserList as IEnumerable<SelectListItem>, new { @class = "form-control", id = "userIdDropdown" })
+                </div>
+                <div class="d-flex align-self-end">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search" style="margin-right: 5px;"></i> Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="visible-xs visible-sm visible-md visible-lg">
+        <div class="row g-3">
+            <form method="get" action="@Url.Action("Dashboard", "Admin")" class="row g-2 row-cols-1 row-cols-md-auto align-items-end">
+                <div class="col">
+                    <label for="fromDate" class="form-label">From Date:</label>
+                    <input type="date" id="fromDate" name="fromDate" class="form-control" value="@fromDateValue">
+                </div>
+                <div class="col">
+                    <label for="toDate" class="form-label">To Date:</label>
+                    <input type="date" id="toDate" name="toDate" class="form-control" value="@toDateValue">
+                </div>
+                <div class="col">
+                    <label for="userId" class="form-label">Username:</label>
+                    @Html.DropDownList("userId", ViewBag.UserList as IEnumerable<SelectListItem>, new { @class = "form-control", id = "userIdDropdown" })
+                </div>
+                <div class="col">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-3 mt-3">
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a id="allTasksLink" class="text-decoration-none" style="cursor: pointer;" title="View Detailed Tasks">
+            <div class="card text-white shadow-lg bg-dark">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-clipboard-list me-1"></i> All Tasks</h5>
+                    <h3 class="display-4">@Model.AllTasks</h3>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a id="pendingTasksLink" class="text-decoration-none" style="cursor: pointer;" title="View Detailed Tasks">
+            <div class="card text-black shadow-lg" style="background-color : yellow;">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-hourglass-start me-1"></i> Pending Tasks</h5>
+                    <h3 class="display-4">@Model.PendingTasks</h3>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a id="inProgressTasksLink" class="text-decoration-none" style="cursor: pointer;" title="View Detailed Tasks">
+            <div class="card text-black shadow-lg" style="background-color: #40e7fa;">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-spinner me-1"></i> In Progress Tasks</h5>
+                    <h3 class="display-4">@Model.InProgressTasks</h3>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a id="completedTasksLink" class="text-decoration-none" style="cursor: pointer;" title="View Detailed Tasks">
+            <div class="card text-white shadow-lg" style="background-color: #3498db;">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-check-circle me-1"></i> Completed Tasks</h5>
+                    <h3 class="display-4">@Model.CompletedTasks</h3>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a id="onHoldTasksLink" class="text-decoration-none" style="cursor: pointer;" title="View Detailed Tasks">
+            <div class="card text-white shadow-lg" style="background-color: purple;">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-pause-circle me-1"></i> On Hold Tasks</h5>
+                    <h3 class="display-4">@Model.OnHoldTasks</h3>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a id="canceledTasksLink" class="text-decoration-none" style="cursor: pointer;" title="View Detailed Tasks">
+            <div class="card text-black shadow-lg" style="background-color: #ffcccc;">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-times-circle me-1"></i> Canceled Tasks</h5>
+                    <h3 class="display-4">@Model.CanceledTasks</h3>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+<br>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var userIdDropdown = document.getElementById("userIdDropdown");
+
+        function updateLinks() {
+            var userId = userIdDropdown.value;
+            var fromDate = "@fromDateValue"; 
+            var toDate = "@toDateValue"; 
+
+            document.getElementById("allTasksLink").href = `@routeFolder/admin/all-task-list?fromDate=${fromDate}&toDate=${toDate}&statusId=0&userId=${userId}`;
+            document.getElementById("pendingTasksLink").href = `@routeFolder/admin/all-task-list?fromDate=${fromDate}&toDate=${toDate}&statusId=1&userId=${userId}`;
+            document.getElementById("inProgressTasksLink").href = `@routeFolder/admin/all-task-list?fromDate=${fromDate}&toDate=${toDate}&statusId=2&userId=${userId}`;
+            document.getElementById("completedTasksLink").href = `@routeFolder/admin/all-task-list?fromDate=${fromDate}&toDate=${toDate}&statusId=3&userId=${userId}`;
+            document.getElementById("onHoldTasksLink").href = `@routeFolder/admin/all-task-list?fromDate=${fromDate}&toDate=${toDate}&statusId=4&userId=${userId}`;
+            document.getElementById("canceledTasksLink").href = `@routeFolder/admin/all-task-list?fromDate=${fromDate}&toDate=${toDate}&statusId=5&userId=${userId}`;
+        }
+
+        userIdDropdown.addEventListener("change", updateLinks);
+        updateLinks(); 
+    });
+</script>

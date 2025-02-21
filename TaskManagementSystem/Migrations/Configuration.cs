@@ -48,9 +48,9 @@
 
             var taskStatuses = new List<TaskStatuses>
              {
-              new TaskStatuses { StatusName = "To Do"},
+              new TaskStatuses { StatusName = "Pending"},
               new TaskStatuses { StatusName = "In Progress" },
-              new TaskStatuses { StatusName = "Done" },
+              new TaskStatuses { StatusName = "Completed" },
               new TaskStatuses { StatusName = "On Hold" },
               new TaskStatuses { StatusName = "Canceled" }
              };
