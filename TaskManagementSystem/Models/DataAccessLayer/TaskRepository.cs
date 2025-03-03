@@ -19,76 +19,61 @@ namespace TaskManagementSystem.Models.DataAccessLayer
 
         public async Task<int> GetTasksCount(DateTime fromDate, DateTime toDate, int statusID, int userID)
         {
-            var tasks = await _dbContext.Tasks
-                  .Where(x => DbFunctions.TruncateTime(x.DateTimeCreated) >= fromDate.Date
-                   && DbFunctions.TruncateTime(x.DateTimeCreated) <= toDate.Date)
-                  .ToListAsync();
-            if (statusID > 0) tasks = tasks.Where(x => x.TaskStatusID == statusID).ToList();
-            if (userID > 0) tasks = tasks.Where(x => x.UserID == userID).ToList();
-            return tasks.Count();
+            return await _dbContext.Tasks
+                      .Where(x => DbFunctions.TruncateTime(x.DateTimeCreated) >= fromDate.Date
+                       && DbFunctions.TruncateTime(x.DateTimeCreated) <= toDate.Date
+                       && (statusID == 0 || x.TaskStatusID == statusID)
+                       && (userID == 0 || x.UserID == userID)
+                       )
+                       .CountAsync();
         }
 
         public async Task<List<Tasks>> GetAllTasks(DateTime fromDate, DateTime toDate, int statusID, int userID)
         {
-            var tasks = await _dbContext.Tasks
-                    .Where(x => DbFunctions.TruncateTime(x.DateTimeCreated) >= fromDate.Date
-                     && DbFunctions.TruncateTime(x.DateTimeCreated) <= toDate.Date)
-                    .ToListAsync();
+            var response = await (from t in _dbContext.Tasks
+                                  join u in _dbContext.Users on t.UserID equals u.ID
+                                  join ts in _dbContext.TaskStatuses on t.TaskStatusID equals ts.ID
+                                  join tp in _dbContext.TaskPriorities on t.TaskPriorityID equals tp.ID
+                                  where DbFunctions.TruncateTime(t.DateTimeCreated) >= DbFunctions.TruncateTime(fromDate)
+                                     && DbFunctions.TruncateTime(t.DateTimeCreated) <= DbFunctions.TruncateTime(toDate)
+                                     && (statusID == 0 || t.TaskStatusID == statusID)
+                                     && (userID == 0 || t.UserID == userID)
+                                  select new
+                                  {
+                                      TaskEntity = t,
+                                      UserEntity = u,
+                                      TaskStatusEntity = ts,
+                                      TaskPriorityEntity = tp
+                                  }).ToListAsync();
 
-            if (statusID > 0) tasks = tasks.Where(x => x.TaskStatusID == statusID).ToList();
+            return response.Select(x => new Tasks
+            {
+                ID = x.TaskEntity.ID,
+                Title = x.TaskEntity.Title,
+                Description = x.TaskEntity.Description,
+                DateTimeCreated = x.TaskEntity.DateTimeCreated,
+                DueDate = x.TaskEntity.DueDate,
+                TaskPriorityID = x.TaskEntity.TaskPriorityID,
 
-            var users = await _dbContext.Users.ToListAsync();
-
-            if (userID > 0) users = users.Where(x => x.ID == userID).ToList();
-
-            var taskStatuses = await _dbContext.TaskStatuses.ToListAsync();
-            var taskPriorities = await _dbContext.TaskPriorities.ToListAsync();
-
-            return tasks
-                // First join: Tasks with Users
-                .Join(users,
-                      task => task.UserID, // Alias: task
-                      user => user.ID,     // Alias: user
-                      (task, user) => new { TaskEntity = task, UserEntity = user }) // Aliases: TaskEntity, UserEntity
-                                                                                    // Second join: The result of the first join with TaskStatuses
-                .Join(taskStatuses,
-                      t => t.TaskEntity.TaskStatusID, // Alias: t (previous join result)
-                      status => status.ID,            // Alias: status
-                      (t, status) => new { t.TaskEntity, t.UserEntity, TaskStatusEntity = status }) // Alias: TaskStatusEntity
-                                                                                                    // Third join: The result of the first join with TaskPriorities
-                .Join(taskPriorities,
-                      t => t.TaskEntity.TaskPriorityID, // Alias: t (previous join result)
-                      priority => priority.ID,          // Alias: priority
-                      (t, priority) => new { t.TaskEntity, t.UserEntity, t.TaskStatusEntity, TaskPriorityEntity = priority }) // Alias: TaskPriorityEntity
-                                                                                                                              // Project the final result
-                .Select(x => new Tasks
+                TaskPriority = new TaskPriorities
                 {
-                    ID = x.TaskEntity.ID,
-                    Title = x.TaskEntity.Title,
-                    Description = x.TaskEntity.Description,
-                    DateTimeCreated = x.TaskEntity.DateTimeCreated,
-                    DueDate = x.TaskEntity.DueDate,
-                    TaskPriorityID = x.TaskEntity.TaskPriorityID, // ✅ Fixed incorrect mapping
+                    PriorityName = x.TaskPriorityEntity.PriorityName
+                },
 
-                    TaskPriority = new TaskPriorities
-                    {
-                        PriorityName = x.TaskPriorityEntity.PriorityName, // Alias applied
-                    },
+                TaskStatusID = x.TaskEntity.TaskStatusID,
+                TaskStatus = new TaskStatuses
+                {
+                    StatusName = x.TaskStatusEntity.StatusName
+                },
 
-                    TaskStatusID = x.TaskEntity.TaskStatusID,
-                    TaskStatus = new TaskStatuses
-                    {
-                        StatusName = x.TaskStatusEntity.StatusName, // Alias applied
-                    },
-
-                    UserID = x.TaskEntity.UserID,
-                    User = new Users
-                    {
-                        Username = x.UserEntity.Username // Alias applied
-                    }
-                })
-                .ToList();
+                UserID = x.TaskEntity.UserID,
+                User = new Users
+                {
+                    Username = x.UserEntity.Username
+                }
+            }).ToList();
         }
+
 
 
         public async Task<List<Tasks>> GetAllTasks(int userId)
@@ -102,22 +87,12 @@ namespace TaskManagementSystem.Models.DataAccessLayer
             var _user = await _dbContext.Users.SingleOrDefaultAsync(s => s.Username == username);
             if (_user == null) return new List<Tasks>();
 
-            if (statusID > 0)
-            {
-                return await _dbContext.Tasks.Where(x => x.UserID == _user.ID
-                         && DbFunctions.TruncateTime(x.DateTimeCreated) >= fromDate.Date
-                         && DbFunctions.TruncateTime(x.DateTimeCreated) <= toDate.Date
-                         && x.TaskStatusID == statusID
-                         )
-                     .ToListAsync();
-            }
-
-            return await _dbContext.Tasks
-                      .Where(x => x.UserID == _user.ID
-                       && DbFunctions.TruncateTime(x.DateTimeCreated) >= fromDate.Date
-                       && DbFunctions.TruncateTime(x.DateTimeCreated) <= toDate.Date
-                       )
-                   .ToListAsync();
+            return await _dbContext.Tasks.Where(x => x.UserID == _user.ID
+                     && DbFunctions.TruncateTime(x.DateTimeCreated) >= fromDate.Date
+                     && DbFunctions.TruncateTime(x.DateTimeCreated) <= toDate.Date
+                     && (statusID == 0 || x.TaskStatusID == statusID)
+                     )
+                 .ToListAsync();
         }
 
 

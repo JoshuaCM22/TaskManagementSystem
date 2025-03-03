@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.Entity;
 using System.Threading.Tasks;
+using System.Linq;
 using TaskManagementSystem.Context;
 using TaskManagementSystem.Models.DatabaseModels;
 using TaskManagementSystem.Models.Interfaces;
@@ -25,20 +26,23 @@ namespace TaskManagementSystem.Models.DataAccessLayer
         {
             var user = await _dbContext.Users.SingleOrDefaultAsync(s => s.Username == users.Username);
             if (user == null) return false;
-            if (user.Password == users.Password) return true;
-            return false;
+            return (user.Password == users.Password);
         }
+
 
         public async Task<bool> IsAdmin(string username)
         {
-            var user = await _dbContext.Users.SingleOrDefaultAsync(s => s.Username == username);
-            return (user.RoleID == 1);
+            return await (from u in _dbContext.Users
+                          where u.Username == username
+                          && u.RoleID == 1
+                          select u).AnyAsync();
         }
 
         public async Task<bool> IsUsernameExist(string username)
         {
-            int count = await _dbContext.Users.CountAsync(x => x.Username == username);
-            return (count > 0);
+            return await (from u in _dbContext.Users
+                          where u.Username == username
+                          select u).AnyAsync();
         }
 
         // Dispose this context when this repository is no longer needed. To avoid increased memory usage.
