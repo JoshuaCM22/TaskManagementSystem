@@ -44,7 +44,7 @@ namespace TaskManagementSystem.Models.DataAccessLayer
                                       UserEntity = u,
                                       TaskStatusEntity = ts,
                                       TaskPriorityEntity = tp
-                                  }).ToListAsync();
+                                  }).OrderByDescending(x=>x.TaskEntity.ID).ToListAsync();
 
             return response.Select(x => new Tasks
             {
@@ -78,7 +78,7 @@ namespace TaskManagementSystem.Models.DataAccessLayer
 
         public async Task<List<Tasks>> GetAllTasks(int userId)
         {
-            return await _dbContext.Tasks.Where(x => x.UserID == userId).ToListAsync();
+            return await _dbContext.Tasks.Where(x => x.UserID == userId).OrderByDescending(x => x.ID).ToListAsync();
         }
 
 
@@ -92,6 +92,7 @@ namespace TaskManagementSystem.Models.DataAccessLayer
                      && DbFunctions.TruncateTime(x.DateTimeCreated) <= toDate.Date
                      && (statusID == 0 || x.TaskStatusID == statusID)
                      )
+                 .OrderByDescending(x => x.ID)
                  .ToListAsync();
         }
 
